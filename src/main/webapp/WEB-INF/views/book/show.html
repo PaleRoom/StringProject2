@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Книга</title>
+    <h1>Книга</h1>
+</head>
+<body>
+<p th:text="${'Название книги: ' + book.getTitle()}">VALUE</p>
+<p th:text="${'Год выпуска книги ' + book.getYear()}">VALUE</p>
+<p th:text="${'Автор ' + book.getAuthor()}">VALUE</p>
+
+<div th:if="${customer==null}">
+    <p>Эта книга свободна кому ее назначить?</p>
+
+    <form th:method="PATCH" th:action="@{/book/{id}/makeOrder (id=${book.getId()})}">
+        <label for="person">Выберите человека: </label>
+        <select th:object="${emptyPerson}" th:field="*{id}" id="person">
+            <option th:each="person : ${people}" th:value="${person.getId()}"
+                    th:text="${person.getName()}"></option>
+        </select>
+
+        <input type="submit" value="выдать книгу" />
+
+    </form>
+</div>
+<br/>
+
+<div th:if="${customer!=null}">
+    <p th:text="${'Находится у ' + customer.getName()}">VALUE</p>
+
+
+<!--    <p th:each="person : ${customer}">-->
+<!--        <a th:href="@{/people/{id}(id=${person.getId()})}"-->
+<!--           th:text="${person.getName()}">user</a>-->
+<!--    </p>-->
+    <form th:method="PATCH" th:action="@{/book/{id}/closeOrder (id=${book.getId()})}">
+        <input type="submit" value="освободить книгу"/>
+    </form>
+</div>
+
+<br/>
+<a th:href="@{/book/{id}/edit(id=${book.getId()})}">________Edit__________</a>
+
+<br/>
+<br/>
+<br/>
+
+<form th:method="DELETE" th:action="@{/book/{id}(id=${book.getId()})}">
+    <input type="submit" value="Delete"/>
+</form>
+
+<br/>
+<a th:href="@{/book}">________Вернуться к книгам__________</a>
+
+<br/>
+</body>
+</html>

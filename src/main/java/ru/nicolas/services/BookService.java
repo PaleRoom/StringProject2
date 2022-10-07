@@ -2,6 +2,8 @@ package ru.nicolas.services;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nicolas.models.Book;
@@ -25,8 +27,15 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    public List<Book> findAllWithPagination(int page, int booksPerPage, boolean sortByYear) {
+       if (sortByYear)
+           return bookRepository.findAll(PageRequest.of(page,booksPerPage, Sort.by("year"))).getContent();
+       else return bookRepository.findAll(PageRequest.of(page,booksPerPage)).getContent();
+    }
+    public List<Book> findAll(Boolean sortByYear) {
+        if (sortByYear)  return bookRepository.findAll(Sort.by("year"));
+        else return bookRepository.findAll();
+
     }
 
     public Book findOne(int id) {
@@ -75,13 +84,16 @@ public class BookService {
         return bookRepository.findByOwner(person);
     }
 
-    public Boolean isExpired(Book book) {
-        if (book.getOrderedAt() != null) {
 
-            return ((long) new Date().getTime() - ((long) book.getOrderedAt().getTime()) > 864000000);
-        } else return false;
+    public boolean isExpiredBook(int id) {
+        Book book = bookRepository.getOne(id);
 
+       return book.isExpired();
     }
+
+    public List<Book> findByTitleStartingWith(String title) {
+        return bookRepository.findByTitleStartingWith(title);
+    };
 }
 
 

@@ -14,7 +14,8 @@
 <h2>Книги клиента</h2>
 <div th:if="${orderedBooks.size()>0}">
 <p th:each="book : ${orderedBooks}">
-    <a th:href="@{/book/{id}(id=${book.getId()})}"
+    <a th:style="${book.isExpired()==true ? 'color: red;' : 'color: green;'}"
+            th:href="@{/book/{id}(id=${book.getId()})}"
        th:text="${book.getTitle()}">user</a>
 </p>
 </div>
@@ -28,6 +29,9 @@
 
 <form th:method="DELETE" th:action="@{/people/{id}(id=${person.getId()})}">
     <input type="submit" value="Delete"/>
+
 </form>
+
+<a th:href="@{/people}">К людям</a>
 </body>
 </html>

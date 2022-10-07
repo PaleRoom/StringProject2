@@ -5,36 +5,40 @@ import javax.validation.constraints.Pattern;
 import java.util.Date;
 
 @Entity
-@Table(name="Book")
+@Table(name = "Book")
 public class Book {
-   @Id
-   @Column(name = "book_id")
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private int id;
+    @Id
+    @Column(name = "book_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-   @ManyToOne
-   @JoinColumn(name="person_id",referencedColumnName = "person_id")
+    @ManyToOne
+    @JoinColumn(name = "person_id", referencedColumnName = "person_id")
 
     private Person owner;
 
-  // @Pattern(regexp = "\\d{4}", message = "Year should contain 4 digits!")
-    @Column(name="year")
+    // @Pattern(regexp = "\\d{4}", message = "Year should contain 4 digits!")
+    @Column(name = "year")
     private int year;
 
-@Column(name = "title")
+    @Column(name = "title")
     private String title;
-@Column(name="author")
+    @Column(name = "author")
     private String author;
 
-    @Column(name="ordered_at")
+    @Column(name = "ordered_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date orderedAt;
+
+    @Transient
+    private boolean expired;
+
 
     public Book() {
 
     }
 
-    public Book(  int year, String title, String author) {
+    public Book(int year, String title, String author) {
 
 
         this.year = year;
@@ -55,7 +59,6 @@ public class Book {
     }
 
 
-
     public int getYear() {
         return year;
     }
@@ -67,7 +70,6 @@ public class Book {
     public void setId(int id) {
         this.id = id;
     }
-
 
 
     public void setYear(int year) {
@@ -93,4 +95,23 @@ public class Book {
     public void setOrderedAt(Date orderedAt) {
         this.orderedAt = orderedAt;
     }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean getExpired() {
+        return expired;
+    }
+
+    public boolean isExpired() {
+        if (this.getOrderedAt() != null) {
+             this.setExpired((long) new Date().getTime() -
+                     ((long) this.getOrderedAt().getTime()) > 864000000);
+
+              return this.getExpired();}
+              else return false;
+
+    }
+
 }

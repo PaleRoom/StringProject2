@@ -1,7 +1,10 @@
 package ru.nicolas.controllers;
 
 import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,42 +27,49 @@ import java.util.Optional;
 public class BookController {
 
     private final BookService bookService;
-   // private final PersonDAO personDAO;
-   private final PeopleService peopleService;
+    // private final PersonDAO personDAO;
+    private final PeopleService peopleService;
 
 
     private final BookValidator bookValidator;
+
     @Autowired
     public BookController(BookService bookService, PeopleService peopleService, BookValidator bookValidator) {
         this.bookService = bookService;
         this.bookValidator = bookValidator;
-             this.peopleService = peopleService;
+        this.peopleService = peopleService;
     }
 
     @GetMapping()
-    public String index(Model model) {
-        model.addAttribute("book", bookService.findAll());
+    public String index(Model model,
+                        @RequestParam(value = "page", required = false) Integer page,
+                        @RequestParam(value = "books_per_page", required = false) Integer booksPerPage,
+                        @RequestParam(value = "sort_by_year", required = false) boolean sortByYear) {
+        if (page == null || booksPerPage == null) model.addAttribute("book", bookService.findAll(sortByYear));
+        else model.addAttribute("book", bookService.findAllWithPagination(page, booksPerPage, sortByYear));
+
+
         model.addAttribute("person", peopleService.findAll());
         return "book/index";
     }
 
     @GetMapping("/{id}")
-    public String show(@PathVariable("id") int id, Model model, @ModelAttribute("emptyPerson") Person person) {
+    public String show(@PathVariable("id") int id, Model model,
+                       @ModelAttribute("emptyPerson") Person person
+    ) {
         model.addAttribute("book", bookService.findOne(id));
         model.addAttribute("people", peopleService.findAll());
 
-        System.out.println(bookService.isExpired(bookService.findOne(id)));
+        if (bookService.isExpiredBook(id))
+            System.out.println(bookService.isExpiredBook(id));
 
 
-
-
-
-       // model.addAttribute("customer",peopleService.findOne(2));
+        // model.addAttribute("customer",peopleService.findOne(2));
 
         //Person customer = bookService.findOne(id).getOwner();
-       //if (customer!=null)
-           model.addAttribute("customer",bookService.findOne(id).getOwner());
-       //System.out.println(peopleService.findOne(bookService.findOne(id).getOwner().getId()));
+        //if (customer!=null)
+        model.addAttribute("customer", bookService.findOne(id).getOwner());
+        //System.out.println(peopleService.findOne(bookService.findOne(id).getOwner().getId()));
 
         return "book/show";
     }
@@ -76,16 +86,17 @@ public class BookController {
     public String create(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult) {
 //        bookValidator.validate(book, bindingResult);
 //        if (bindingResult.hasErrors())
-           // return "book/new";
+        // return "book/new";
         bookService.save(book);
         return "redirect:/book";
     }
 
     @GetMapping("/{id}/edit")
     public String edit(Model model, @PathVariable("id") int id) {
-        model.addAttribute("book",bookService.findOne(id));
+        model.addAttribute("book", bookService.findOne(id));
         return "book/edit";
     }
+
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult, @PathVariable("id") int id) {
 //        bookValidator.validate(book, bindingResult);
@@ -102,17 +113,28 @@ public class BookController {
     }
 
     @PatchMapping("/{id}/makeOrder")
-    public String makeOrder(@ModelAttribute("book")  @PathVariable("id") int id, Person person) {
-       bookService.makeOrder(id, person);
+    public String makeOrder(@ModelAttribute("book") @PathVariable("id") int id, Person person) {
+        bookService.makeOrder(id, person);
 
         return "redirect:/book/{id}";
     }
 
     @PatchMapping("/{id}/closeOrder")
-    public String closeOrder(@ModelAttribute("book")  @PathVariable("id") int id) {
+    public String closeOrder(@ModelAttribute("book") @PathVariable("id") int id) {
         bookService.closeOrder(bookService.findOne(id));
 
         return "redirect:/book/{id}";
     }
+
+    @GetMapping("/search")
+    public String search(Model model, @RequestParam(name = "search", required = false) String search) {
+        if (search != null)
+            model.addAttribute("book", bookService.findByTitleStartingWith(search));
+
+        else model.addAttribute("allBooks", bookService.findAll(false));
+        return "book/search";
+
+    }
+
 
 }

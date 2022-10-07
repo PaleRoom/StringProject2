@@ -14,11 +14,14 @@
        th:text="${book.getId() + ' ' + book.getTitle() + ', выпущена: ' + book.getYear() +', ' + book.getAuthor() +', Находится на руках у: ' + book.getOwner()}">user</a>
 </div>
 <br/>
+<hr/>
 
+<a href="/book/search">К поиску книг</a>
 
 <hr/>
 <a href="/book/new">Добавить новую книгу</a>
 
 <br/>
+<a th:href="@{/startup}">На главную</a>
 </body>
 </html>

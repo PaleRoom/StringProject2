@@ -27,7 +27,7 @@
 <br/>
 
 <div th:if="${customer!=null}">
-    <p th:text="${'Находится у ' + customer.getName()}">VALUE</p>
+    <p th:text="${'           Находится у ' + customer.getName()}">VALUE</p>
 
 
 <!--    <p th:each="person : ${customer}">-->
@@ -54,5 +54,6 @@
 <a th:href="@{/book}">________Вернуться к книгам__________</a>
 
 <br/>
+
 </body>
 </html>
